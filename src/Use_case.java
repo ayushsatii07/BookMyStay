@@ -1,5 +1,4 @@
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Use_case {
 
@@ -63,7 +62,7 @@ public class Use_case {
             inventory = new HashMap<>();
             inventory.put("Single Room", 5);
             inventory.put("Double Room", 3);
-            inventory.put("Suite Room", 0);
+            inventory.put("Suite Room", 2);
         }
 
         public int getAvailability(String roomType) {
@@ -82,7 +81,6 @@ public class Use_case {
         public void searchAvailableRooms(Room[] rooms) {
             for (Room room : rooms) {
                 int available = inventory.getAvailability(room.getRoomType());
-
                 if (available > 0) {
                     room.displayDetails();
                     System.out.println("Available: " + available);
@@ -92,7 +90,52 @@ public class Use_case {
         }
     }
 
+    static class Reservation {
+
+        private String guestName;
+        private String roomType;
+
+        public Reservation(String guestName, String roomType) {
+            this.guestName = guestName;
+            this.roomType = roomType;
+        }
+
+        public String getGuestName() {
+            return guestName;
+        }
+
+        public String getRoomType() {
+            return roomType;
+        }
+    }
+
+    static class BookingQueue {
+
+        private Queue<Reservation> queue;
+
+        public BookingQueue() {
+            queue = new LinkedList<>();
+        }
+
+        public void addRequest(Reservation reservation) {
+            queue.offer(reservation);
+            System.out.println("Request added for " + reservation.getGuestName() +
+                    " (" + reservation.getRoomType() + ")");
+        }
+
+        public void displayQueue() {
+            System.out.println("\nCurrent Booking Queue:");
+            for (Reservation r : queue) {
+                System.out.println(r.getGuestName() + " -> " + r.getRoomType());
+            }
+        }
+    }
+
     public static void main(String[] args) {
+
+        RoomInventory inventory = new RoomInventory();
+
+        SearchService searchService = new SearchService(inventory);
 
         Room[] rooms = {
                 new SingleRoom(),
@@ -100,11 +143,15 @@ public class Use_case {
                 new SuiteRoom()
         };
 
-        RoomInventory inventory = new RoomInventory();
-
-        SearchService searchService = new SearchService(inventory);
-
         System.out.println("Available Rooms:");
         searchService.searchAvailableRooms(rooms);
+
+        BookingQueue bookingQueue = new BookingQueue();
+
+        bookingQueue.addRequest(new Reservation("Alice", "Single Room"));
+        bookingQueue.addRequest(new Reservation("Bob", "Double Room"));
+        bookingQueue.addRequest(new Reservation("Charlie", "Suite Room"));
+
+        bookingQueue.displayQueue();
     }
 }
